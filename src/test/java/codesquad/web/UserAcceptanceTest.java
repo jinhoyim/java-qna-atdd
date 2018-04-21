@@ -6,7 +6,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Map;
 
+import codesquad.dto.UserDto;
+import codesquad.security.HttpSessionUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,5 +111,43 @@ public class UserAcceptanceTest extends AcceptanceTest {
         ResponseEntity<String> response = update(basicAuthTemplate());
         assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
         assertTrue(response.getHeaders().getLocation().getPath().startsWith("/users"));
+    }
+
+    @Test
+    public void login() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+        params.add("userId", "javajigi");
+        params.add("password", "test");
+        params.add("name", "자바지기");
+        params.add("email", "javajigi@slipp.net");
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(params, headers);
+
+        ResponseEntity<String> response = this.template().postForEntity("/users/login", request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertThat(response.getHeaders().getLocation().getPath(), is("/users"));
+    }
+
+    @Test
+    public void login_failed() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+        params.add("userId", "javajigi");
+        params.add("password", "111");
+        params.add("name", "자바지기");
+        params.add("email", "javajigi@slipp.net");
+        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(params, headers);
+
+        ResponseEntity<String> response = this.template().postForEntity("/users/login", request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertThat(response.getHeaders().getLocation().getPath(), is("/user/login_failed"));
     }
 }
