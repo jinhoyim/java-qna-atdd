@@ -3,15 +3,15 @@ package codesquad.web;
 import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
-import codesquad.dto.UserDto;
 import codesquad.security.LoginUser;
 import codesquad.service.QnaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -32,5 +32,24 @@ public class QuestionController {
     public String create(@LoginUser User loginUser, QuestionDto question) {
         qnaService.create(loginUser, question);
         return "redirect:/home";
+    }
+
+    @GetMapping("/{id}")
+    public String read(@PathVariable long id, Model model) {
+        final Question question = qnaService.findById(id);
+        model.addAttribute("question", question);
+        return "/qna/show";
+    }
+
+    @GetMapping("/{id}/form")
+    public String updateForm(@LoginUser User loginUser, @PathVariable long id, Model model) {
+        model.addAttribute("question", qnaService.findOwnedById(loginUser, id));
+        return "/qna/updateForm";
+    }
+
+    @PutMapping("/{id}")
+    public String update(@LoginUser User loginUser, @PathVariable long id, QuestionDto dto, Model model) {
+
+        return "redirect:/qna/show";
     }
 }

@@ -60,4 +60,42 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 
         return template.postForEntity("/qna", request, String.class);
     }
+
+    @Test
+    public void read() {
+        final Question question = defaultQuestion();
+        final ResponseEntity<String> response = template().getForEntity(String.format("/qna/%d", question.getId()), String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        assertThat(response.getBody().contains(question.getContents()), is(true));
+    }
+
+    @Test
+    public void updateForm_no_login() throws Exception {
+        final ResponseEntity<String> response = template().getForEntity(String.format("/qna/%d/form", defaultQuestion().getId()), String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void update_no_login() throws Exception {
+        final ResponseEntity<String> response = update(template());
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void update() throws Exception {
+        final ResponseEntity<String> response = update(basicAuthTemplate());
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+    }
+    
+    private ResponseEntity<String> update(TestRestTemplate template) {
+        final HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .addParameter("_method", "put")
+                .addParameter("title", "수정된 질문 제목")
+                .addParameter("contents", "수정된 질문 내용")
+                .build();
+
+        return template.postForEntity(String.format("/qna/%d", defaultQuestion().getId()), request, String.class);
+    }
 }
