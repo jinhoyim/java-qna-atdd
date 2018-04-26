@@ -29,9 +29,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     private QuestionRepository questionRepository;
 
     @Test
-    public void createForm() throws Exception
-
-    {
+    public void createForm() throws Exception {
         ResponseEntity<String> response = template().getForEntity("/qna/form", String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         log.debug("body : {}", response.getBody());
@@ -62,6 +60,15 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    public void list() {
+        ResponseEntity<String> response = template().getForEntity("/qna", String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        log.debug("body : {}", response.getBody());
+        assertThat(response.getBody().contains(defaultQuestion().getTitle()), is(true));
+        assertThat(response.getBody().contains(defaultQuestion().getContents()), is(false));
+    }
+
+    @Test
     public void read() {
         final Question question = defaultQuestion();
         final ResponseEntity<String> response = template().getForEntity(String.format("/qna/%d", question.getId()), String.class);
@@ -88,7 +95,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 
         assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
     }
-    
+
     private ResponseEntity<String> update(TestRestTemplate template) {
         final HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
                 .addParameter("_method", "put")

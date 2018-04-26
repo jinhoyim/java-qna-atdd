@@ -14,6 +14,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/qna")
@@ -32,6 +35,13 @@ public class QuestionController {
     public String create(@LoginUser User loginUser, QuestionDto question) {
         qnaService.create(loginUser, question);
         return "redirect:/home";
+    }
+
+    @GetMapping("")
+    public String list(Model model) {
+        Iterable<Question> questions = qnaService.findAll();
+        model.addAttribute("questions", questions);
+        return "/home";
     }
 
     @GetMapping("/{id}")
