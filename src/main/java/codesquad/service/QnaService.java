@@ -53,8 +53,10 @@ public class QnaService {
 
 
     public Question update(User loginUser, long id, Question updatedQuestion) {
-        // TODO 수정 기능 구현
-        return null;
+        final Question question = questionRepository.findOne(id);
+        Question updated = question.update(loginUser, updatedQuestion);
+
+        return questionRepository.save(updated);
     }
 
     @Transactional

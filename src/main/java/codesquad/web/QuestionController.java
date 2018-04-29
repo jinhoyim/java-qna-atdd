@@ -58,8 +58,8 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}")
-    public String update(@LoginUser User loginUser, @PathVariable long id, QuestionDto dto, Model model) {
-
-        return "redirect:/qna/show";
+    public String update(@LoginUser User loginUser, @PathVariable long id, QuestionDto dto) {
+        qnaService.update(loginUser, id, dto.toQuestion());
+        return "redirect:/home";
     }
 }

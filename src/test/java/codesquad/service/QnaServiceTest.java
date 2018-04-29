@@ -84,4 +84,24 @@ public class QnaServiceTest {
 
         qnaService.findOwnedById(loginUser, questionId);
     }
+
+    @Test
+    public void update() {
+        User loginUser = new User(10, "user11", "pw11", "name11", "email11");
+        long questionId = 10;
+        Question originalQuestion = new Question(10, "질문제목", "본문내용");
+        originalQuestion.writeBy(loginUser);
+        Question target = new Question("수정제목", "수정본문");
+
+        final Question updatedQuestion = originalQuestion.update(loginUser, target);
+
+        when(questionRepository.findOne(questionId)).thenReturn(originalQuestion);
+        when(questionRepository.save(updatedQuestion)).thenReturn(updatedQuestion);
+
+        final Question updatedResult = qnaService.update(loginUser, questionId, target);
+
+        assertThat(updatedQuestion, is(updatedResult));
+        verify(questionRepository, times(1)).findOne(questionId);
+        verify(questionRepository, times(1)).save(updatedQuestion);
+    }
 }
