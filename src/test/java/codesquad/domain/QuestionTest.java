@@ -4,9 +4,8 @@ import codesquad.UnAuthorizedException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.stream.Stream;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
 
 public class QuestionTest {
 
@@ -26,6 +25,7 @@ public class QuestionTest {
     public void setUp() throws Exception {
         question = new Question(QUESTION_ID, TITLE, CONTENTS);
         user = new User(USER_ID, USER_USERID, USER_PW, USER_NAME, USER_MAIL);
+        question.writeBy(user);
     }
 
     @Test
@@ -42,30 +42,25 @@ public class QuestionTest {
 
     @Test
     public void 작성자() {
-        question.writeBy(user);
         final User writer = question.getWriter();
         assertThat(user).isEqualTo(writer);
     }
 
     @Test
     public void 소유자체크() {
-        question.writeBy(user);
         final boolean isOwner = question.isOwner(user);
         assertThat(isOwner).isTrue();
     }
 
     @Test
     public void 소유자아님() {
-        question.writeBy(user);
         User otherUser = new User(1000, "aa", "bb", "cc", "dd");
         final boolean isOwner = question.isOwner(otherUser);
         assertThat(isOwner).isFalse();
     }
 
     @Test
-    public void update_owner() {
-        question.writeBy(user);
-
+    public void update_by_owner() {
         String updateTitle = "수정된질문제목";
         String updateContent = "수정된질문내용";
         Question target = new Question(updateTitle, updateContent);
@@ -79,8 +74,6 @@ public class QuestionTest {
 
     @Test
     public void update_return() {
-        question.writeBy(user);
-
         String updateTitle = "수정된질문제목";
         String updateContent = "수정된질문내용";
         Question target = new Question(updateTitle, updateContent);
@@ -91,8 +84,7 @@ public class QuestionTest {
     }
 
     @Test(expected = UnAuthorizedException.class)
-    public void update_not_owner() {
-        question.writeBy(user);
+    public void update_by_not_owner() {
         User otherUser = new User(100, "other123", "pw11", "otherName", "email");
 
         String updateTitle = "수정된질문제목";
@@ -100,5 +92,17 @@ public class QuestionTest {
         Question target = new Question(updateTitle, updateContent);
 
         question.update(otherUser, target);
+    }
+
+    @Test
+    public void delete_by_owner() {
+        question.delete(user);
+        assertThat(question.isDeleted()).isTrue();
+    }
+
+    @Test(expected = UnAuthorizedException.class)
+    public void delete_by_not_owner() {
+        User otherUser = new User(100, "other123", "pw11", "otherName", "email");
+        question.delete(otherUser);
     }
 }

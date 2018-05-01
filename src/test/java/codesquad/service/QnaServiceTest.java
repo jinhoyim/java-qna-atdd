@@ -1,5 +1,6 @@
 package codesquad.service;
 
+import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
@@ -12,10 +13,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QnaServiceTest {
@@ -103,5 +102,34 @@ public class QnaServiceTest {
         assertThat(updatedQuestion, is(updatedResult));
         verify(questionRepository, times(1)).findOne(questionId);
         verify(questionRepository, times(1)).save(updatedQuestion);
+    }
+
+    @Test(expected = UnAuthorizedException.class)
+    public void update_by_other_user() {
+        User loginUser = new User(10, "user11", "pw11", "name11", "email11");
+        User writer = new User(20, "writer-id", "pw11", "writer-name", "writer-email");
+        long questionId = 10;
+        Question originalQuestion = new Question(10, "질문제목", "본문내용");
+        originalQuestion.writeBy(loginUser);
+        Question target = new Question("수정제목", "수정본문");
+
+        originalQuestion.update(writer, target);
+    }
+
+    @Test
+    public void delete() throws CannotDeleteException {
+        User loginUser = new User(10, "user11", "pw11", "name11", "email11");
+        long questionId = 10;
+        Question question = new Question(10, "질문제목", "본문내용");
+        question.writeBy(loginUser);
+        final Question spy = spy(question);
+        when(questionRepository.findOne(questionId)).thenReturn(spy);
+
+        qnaService.deleteQuestion(loginUser, questionId);
+        verify(questionRepository, times(1)).findOne(questionId);
+
+        verify(spy).delete(loginUser);
+        verify(questionRepository, times(1)).save(spy);
+        assertTrue(spy.isDeleted());
     }
 }

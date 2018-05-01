@@ -50,4 +50,8 @@ public abstract class AcceptanceTest {
     protected Question defaultQuestion() {
         return questionRepository.findOne(DEFAULT_QUESTION);
     }
+
+    protected Question findByQuestionId(long questionId) {
+        return questionRepository.findOne(questionId);
+    }
 }

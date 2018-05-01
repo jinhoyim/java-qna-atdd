@@ -10,7 +10,6 @@ import codesquad.dto.QuestionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +61,9 @@ public class QnaService {
     @Transactional
     public void deleteQuestion(User loginUser, long questionId) throws CannotDeleteException {
         // TODO 삭제 기능 구현
+        final Question question = questionRepository.findOne(questionId);
+        question.delete(loginUser);
+        questionRepository.save(question);
     }
 
     public Iterable<Question> findAll() {
