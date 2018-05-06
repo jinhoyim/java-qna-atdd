@@ -23,7 +23,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create() {
-        QuestionDto newQuestion = createQuestionDto(10);
+        QuestionDto newQuestion = createQuestionDto();
         final String location = createResource(API_QUESTION_URI, newQuestion, defaultUser());
 
         final QuestionDto created = getResource(location, QuestionDto.class);
@@ -33,15 +33,15 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create_no_login() {
-        QuestionDto newQuestion = createQuestionDto(11);
+        QuestionDto newQuestion = createQuestionDto();
 
         final ResponseEntity<String> response = template().postForEntity(API_QUESTION_URI, newQuestion, String.class);
 
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
-    private QuestionDto createQuestionDto(long id) {
-        return createQuestionDto(id, "질문제목", "질문본문");
+    private QuestionDto createQuestionDto() {
+        return createQuestionDto(0, "질문제목", "질문본문");
     }
 
     private QuestionDto createQuestionDto(long id, String title, String contents) {
@@ -58,7 +58,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void update() {
-        QuestionDto newQuestion = createQuestionDto(12);
+        QuestionDto newQuestion = createQuestionDto();
         String location = createResource(API_QUESTION_URI, newQuestion, defaultUser());
         final QuestionDto created = getResource(location, QuestionDto.class);
         QuestionDto updateQuestion = createQuestionDto(created.getId(), "수정질문", "수정답변");
@@ -73,7 +73,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void update_다른_사람() {
         User writer = findByUserId(SECOND_LOGIN_USER);
-        QuestionDto newQuestion = createQuestionDto(12);
+        QuestionDto newQuestion = createQuestionDto();
         String location = createResource(API_QUESTION_URI, newQuestion, writer);
         final QuestionDto created = getResource(location, QuestionDto.class);
         QuestionDto updateQuestion = createQuestionDto(created.getId(), "수정질문", "수정답변");
@@ -88,7 +88,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void delete() {
-        QuestionDto newQuestion = createQuestionDto(13);
+        QuestionDto newQuestion = createQuestionDto();
         String location = createResource(API_QUESTION_URI, newQuestion, defaultUser());
         final QuestionDto created = getResource(location, QuestionDto.class);
 
@@ -103,7 +103,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void delete_other_user() {
         User writer = findByUserId(SECOND_LOGIN_USER);
-        QuestionDto newQuestion = createQuestionDto(14);
+        QuestionDto newQuestion = createQuestionDto();
         String location = createResource(API_QUESTION_URI, newQuestion, writer);
         final QuestionDto created = getResource(location, QuestionDto.class);
 
@@ -118,7 +118,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     public void list() {
         QuestionsDto beforeCreate = getResource(API_QUESTION_URI, QuestionsDto.class);
 
-        QuestionDto newQuestion = createQuestionDto(15);
+        QuestionDto newQuestion = createQuestionDto();
         createResource(API_QUESTION_URI, newQuestion, defaultUser());
 
         QuestionsDto afterCreate = getResource(API_QUESTION_URI, QuestionsDto.class);
