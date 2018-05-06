@@ -1,6 +1,7 @@
 package codesquad.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Resource;
 
@@ -39,7 +40,7 @@ public class QnaService {
     }
 
     public Question findById(long id) {
-        return questionRepository.findOne(id);
+        return questionRepository.findByIdAndDeleted(id, false);
     }
 
     public Question findOwnedById(User loginUser, long id) {
