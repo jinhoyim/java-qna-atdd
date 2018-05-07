@@ -1,5 +1,7 @@
 package codesquad.web;
 
+import codesquad.domain.Answer;
+import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
 import codesquad.dto.QuestionsDto;
@@ -11,6 +13,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
@@ -50,7 +54,10 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void read() {
-        final QuestionDto questionDto = defaultQuestion().toQuestionDto();
+        final Question question = defaultQuestion();
+
+        final QuestionDto questionDto = new QuestionDto(question.getId(), question.getTitle(), question.getContents(), question.getWriter(), question.getAnswers());
+
         String location = API_QUESTION_URI + "/" + questionDto.getId();
         final QuestionDto found = getResource(location, QuestionDto.class);
         assertThat(found, is(questionDto));

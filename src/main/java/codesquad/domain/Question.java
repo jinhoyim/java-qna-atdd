@@ -2,16 +2,9 @@ package codesquad.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
+import javax.persistence.*;
 import javax.validation.constraints.Size;
 
 import codesquad.UnAuthorizedException;
@@ -35,7 +28,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Where(clause = "deleted = false")
     @OrderBy("id ASC")
     private List<Answer> answers = new ArrayList<>();
@@ -76,6 +69,10 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         answers.add(answer);
     }
 
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
     public boolean isOwner(User loginUser) {
         return writer.equals(loginUser);
     }
@@ -90,7 +87,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     }
 
     public QuestionDto toQuestionDto() {
-        return new QuestionDto(getId(), this.title, this.contents);
+        return new QuestionDto(getId(), this.title, this.contents, this.writer, this.answers);
     }
 
     @Override
@@ -112,5 +109,9 @@ public class Question extends AbstractEntity implements UrlGeneratable {
             throw new UnAuthorizedException();
 
         this.deleted = true;
+    }
+
+    public Answer getAnswer(long id) {
+        return this.answers.stream().filter(answer -> answer.getId() == id).findFirst().get();
     }
 }

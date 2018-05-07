@@ -76,7 +76,17 @@ public class QnaService {
     }
 
     public Answer addAnswer(User loginUser, long questionId, String contents) {
-        return null;
+        final Question question = findById(questionId);
+        Answer newAnswer = new Answer(loginUser, contents);
+        question.addAnswer(newAnswer);
+        questionRepository.save(question);
+        answerRepository.save(newAnswer);
+        return newAnswer;
+    }
+
+    public Answer findAnswerById(long questionId, long id) {
+        final Question question = findById(questionId);
+        return question.getAnswer(id);
     }
 
     public Answer deleteAnswer(User loginUser, long id) {

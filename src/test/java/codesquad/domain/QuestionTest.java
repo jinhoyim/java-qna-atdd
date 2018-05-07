@@ -1,8 +1,15 @@
 package codesquad.domain;
 
 import codesquad.UnAuthorizedException;
+import codesquad.dto.AnswerDto;
+import codesquad.dto.QuestionDto;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -98,6 +105,59 @@ public class QuestionTest {
     public void delete_by_not_owner() {
         Question origin = originQuestion();
         origin.delete(UserTest.SANJIGI);
+    }
+
+    @Test
+    public void 답변추가() {
+        Question question = FIRST_QUESTION;
+        User writer = UserTest.SANJIGI;
+        Answer newAnswer = new Answer(writer, "답변내용1");
+        question.addAnswer(newAnswer);
+
+        final Answer found = question.getAnswer(newAnswer.getId());
+        assertThat(found).isEqualTo(newAnswer);
+    }
+
+    @Test
+    public void DTO변환() {
+        Question question = new Question(10, "질문제목", "질문답변");
+        User questionWriter = new User(20, "writerId", "pw12", "작성자", "메일");
+        question.writeBy(questionWriter);
+        User answerWriter = new User(21, "answerWriterId", "pw12", "답변자", "메일");
+        Answer answer1 = new Answer(answerWriter, "답변본문1");
+        Answer answer2 = new Answer(questionWriter, "답변본문2");
+        question.addAnswer(answer1);
+        question.addAnswer(answer2);
+        final QuestionDto questionDto = question.toQuestionDto();
+
+        List<Answer> answers = new ArrayList<>();
+        answers.add(answer1);
+        answers.add(answer2);
+        QuestionDto dto = new QuestionDto(question.getId(), question.getTitle(), question.getContents(), question.getWriter(), answers);
+
+        assertThat(questionDto).isEqualTo(dto);
+    }
+
+    @Test
+    public void DTO항목() {
+        Question question = new Question(10, "질문제목", "질문답변");
+        User questionWriter = new User(20, "writerId", "pw12", "작성자", "메일");
+        question.writeBy(questionWriter);
+        User answerWriter = new User(21, "answerWriterId", "pw12", "답변자", "메일");
+        Answer answer1 = new Answer(answerWriter, "답변본문1");
+        Answer answer2 = new Answer(questionWriter, "답변본문2");
+
+        List<Answer> answers = new ArrayList<>();
+        answers.add(answer1);
+        answers.add(answer2);
+        QuestionDto dto = new QuestionDto(question.getId(), question.getTitle(), question.getContents(), question.getWriter(), answers);
+        List<AnswerDto> answerDtos = answers.stream().map(Answer::toAnswerDto).collect(Collectors.toList());
+
+        assertThat(dto.getId()).isEqualTo(question.getId());
+        assertThat(dto.getTitle()).isEqualTo(question.getTitle());
+        assertThat(dto.getContents()).isEqualTo(question.getContents());
+        assertThat(dto.getWriter()).isEqualTo(questionWriter.toUserDto());
+        assertThat(dto.getAnswers()).isEqualTo(answerDtos);
     }
 }
 
