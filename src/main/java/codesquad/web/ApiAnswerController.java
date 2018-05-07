@@ -34,12 +34,15 @@ public class ApiAnswerController {
     @GetMapping("{id}")
     public AnswerDto show(@PathVariable long questionId, @PathVariable long id) {
         final Answer answer = qnaService.findAnswerById(questionId, id);
+        if (answer == null)
+            return null;
+
         return answer.toAnswerDto();
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@LoginUser User loginUser, @PathVariable long id) {
-        qnaService.deleteAnswer(loginUser, id);
+    public ResponseEntity<Void> delete(@LoginUser User loginUser, @PathVariable long questionId, @PathVariable long id) {
+        qnaService.deleteAnswer(loginUser, questionId, id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

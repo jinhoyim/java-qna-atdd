@@ -65,14 +65,6 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         this.writer = loginUser;
     }
 
-    public void addAnswer(Answer answer) {
-        answer.toQuestion(this);
-        answers.add(answer);
-    }
-
-    public List<Answer> getAnswers() {
-        return answers;
-    }
 
     public boolean isOwner(User loginUser) {
         return writer.equals(loginUser);
@@ -89,11 +81,6 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 
     public QuestionDto toQuestionDto() {
         return new QuestionDto(getId(), this.title, this.contents, this.writer, this.answers);
-    }
-
-    @Override
-    public String toString() {
-        return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
     }
 
     public Question update(User loginUser, Question updatedQuestion) {
@@ -117,7 +104,21 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         this.deleted = true;
     }
 
-    public Answer getAnswer(long id) {
-        return this.answers.stream().filter(answer -> answer.getId() == id).findFirst().get();
+    public void addAnswer(Answer answer) {
+        answer.toQuestion(this);
+        answers.add(answer);
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public Answer getAnswer(long answerId) {
+        return this.answers.stream().filter(answer -> answer.getId() == answerId).findFirst().orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
     }
 }
