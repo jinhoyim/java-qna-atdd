@@ -3,6 +3,7 @@ package codesquad.web;
 import codesquad.domain.Answer;
 import codesquad.domain.Question;
 import codesquad.domain.User;
+import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
 import codesquad.dto.QuestionsDto;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import static org.junit.Assert.assertThat;
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     private static final String API_QUESTION_URI = "/api/questions";
+    private static final String API_ANSWER_PATH = "/answers";
 
     private static final Logger log = LoggerFactory.getLogger(UserAcceptanceTest.class);
 
@@ -114,11 +116,48 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String location = createResource(API_QUESTION_URI, newQuestion, writer);
         final QuestionDto created = getResource(location, QuestionDto.class);
 
-        final ResponseEntity<Void> updateResponse = basicAuthTemplate(defaultUser()).exchange(location, HttpMethod.DELETE, new HttpEntity<>(null), Void.class);
-        assertThat(updateResponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
+        final ResponseEntity<Void> deleteResponse = basicAuthTemplate(defaultUser()).exchange(location, HttpMethod.DELETE, new HttpEntity<>(null), Void.class);
+        assertThat(deleteResponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
 
         final QuestionDto deleted = getResource(location, QuestionDto.class);
         assertThat(deleted, is(created));
+    }
+
+    @Test
+    public void delete_has_answer() {
+        User writer = findByUserId(SECOND_LOGIN_USER);
+        QuestionDto newQuestion = createQuestionDto();
+        final String questionLocation = createResource(API_QUESTION_URI, newQuestion, writer);
+
+        AnswerDto newAnswer = new AnswerDto("답변내용1");
+        createResource(questionLocation + API_ANSWER_PATH, newAnswer, writer);
+
+        final ResponseEntity<Void> deleteResponse = basicAuthTemplate(writer).exchange(questionLocation, HttpMethod.DELETE, new HttpEntity<>(null), Void.class);
+
+        assertThat(deleteResponse.getStatusCode(), is(HttpStatus.NO_CONTENT));
+
+        QuestionDto deleted = getResource(questionLocation, QuestionDto.class);
+
+        assertThat(deleted, nullValue());
+    }
+
+    @Test
+    public void delete_has_answer_by_other_user() {
+        User writer = findByUserId(SECOND_LOGIN_USER);
+        QuestionDto newQuestion = createQuestionDto();
+        final String questionLocation = createResource(API_QUESTION_URI, newQuestion, writer);
+
+        User other = defaultUser();
+        AnswerDto newAnswer = new AnswerDto("답변내용1");
+        createResource(questionLocation + API_ANSWER_PATH, newAnswer, other);
+
+        final ResponseEntity<Void> deleteResponse = basicAuthTemplate(writer).exchange(questionLocation, HttpMethod.DELETE, new HttpEntity<>(null), Void.class);
+
+        assertThat(deleteResponse.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+
+        QuestionDto notDeleted = getResource(questionLocation, QuestionDto.class);
+
+        assertThat(notDeleted, notNullValue());
     }
 
     @Test

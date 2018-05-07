@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
+import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
 import org.hibernate.annotations.Where;
 
@@ -104,9 +105,14 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return this;
     }
 
-    public void delete(User loginUser) {
+    public void delete(User loginUser) throws CannotDeleteException {
         if (!this.isOwner(loginUser))
             throw new UnAuthorizedException();
+
+        final boolean match = this.answers.stream()
+                .anyMatch(answer -> !answer.getWriter().equals(loginUser));
+        if (match)
+            throw new CannotDeleteException("다른 사용자의 답변이 존재합니다.");
 
         this.deleted = true;
     }

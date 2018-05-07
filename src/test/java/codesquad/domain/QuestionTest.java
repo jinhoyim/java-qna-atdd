@@ -1,5 +1,6 @@
 package codesquad.domain;
 
+import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
 import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
@@ -95,16 +96,31 @@ public class QuestionTest {
     }
 
     @Test
-    public void delete_by_owner() {
+    public void delete_by_owner() throws CannotDeleteException {
         Question origin = originQuestion();
         origin.delete(UserTest.JAVAJIGI);
         assertThat(origin.isDeleted()).isTrue();
     }
 
     @Test(expected = UnAuthorizedException.class)
-    public void delete_by_not_owner() {
+    public void delete_by_not_owner() throws CannotDeleteException {
         Question origin = originQuestion();
         origin.delete(UserTest.SANJIGI);
+    }
+
+    @Test
+    public void delete_has_answer() throws CannotDeleteException {
+        Question origin = originQuestion();
+        origin.addAnswer(new Answer(origin.getWriter(), "답변내용1"));
+        origin.delete(origin.getWriter());
+        assertThat(origin.isDeleted()).isTrue();
+    }
+
+    @Test(expected = CannotDeleteException.class)
+    public void delete_has_answer_by_other() throws CannotDeleteException {
+        Question origin = originQuestion();
+        origin.addAnswer((new Answer(UserTest.SANJIGI, "답변내용1")));
+        origin.delete(origin.getWriter());
     }
 
     @Test

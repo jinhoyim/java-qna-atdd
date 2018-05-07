@@ -129,7 +129,6 @@ public class QnaServiceTest {
         verify(questionRepository, times(1)).findOne(questionId);
 
         verify(spy).delete(loginUser);
-        verify(questionRepository, times(1)).save(spy);
         assertTrue(spy.isDeleted());
     }
 }
