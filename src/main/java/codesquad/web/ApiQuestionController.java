@@ -31,7 +31,6 @@ public class ApiQuestionController {
                 .map(Question::toQuestionDto)
                 .collect(Collectors.toList());
         final QuestionsDto dto = new QuestionsDto(list);
-        int size = dto.getSize();
         return dto;
     }
 
