@@ -18,11 +18,7 @@ public class AnswerDto {
     }
 
     public AnswerDto(String contents) {
-        this(0, contents);
-    }
-
-    public AnswerDto(long id, String contents) {
-        this(id, contents, null);
+        this(0, contents, null);
     }
 
     public AnswerDto(long id, String contents, User writer) {
