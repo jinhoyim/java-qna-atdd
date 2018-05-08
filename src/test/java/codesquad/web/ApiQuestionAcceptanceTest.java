@@ -55,17 +55,6 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void read() {
-        final Question question = defaultQuestion();
-
-        final QuestionDto questionDto = new QuestionDto(question.getId(), question.getTitle(), question.getContents(), question.getWriter(), question.getAnswers());
-
-        String location = API_QUESTION_URI + "/" + questionDto.getId();
-        final QuestionDto found = getResource(location, QuestionDto.class);
-        assertThat(found, is(questionDto));
-    }
-
-    @Test
     public void update() {
         QuestionDto newQuestion = createQuestionDto();
         String location = createResource(API_QUESTION_URI, newQuestion, defaultUser());
